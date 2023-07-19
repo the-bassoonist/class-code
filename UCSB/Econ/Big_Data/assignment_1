@@ -1,0 +1,262 @@
+#This project was done for Econ 155-Big Data in Economics
+#first things fist, find what directory you are working in, for this use getwd()
+
+getwd()
+
+#setting the directory to something else
+
+setwd("S:/UCSB/Winter 2021")
+
+#downloading and installing packages
+
+install.packages(c(
+  "haven",
+  "tidyverse",
+  "janitor",
+  "ggplot2",
+  "dplyr",
+  "tidyr",
+  "pacman"
+))
+
+#loading the packages to R using pacman
+
+library(pacman)
+
+p_load("haven", "tidyverse", "janitor", "ggplot2", "dplyr", "tidyr")
+
+
+#with that out of the way let's play with make sure that you load the data from your working direcorty
+
+#question 3
+
+#importing data sets, using data from the US opportunity atlas. The atlas.dta is the general data provided by
+#prof. Benzarti, however specific information had to be downloaded and imported for the sake of the question 
+#which needs to include the area I grew up in. 
+us_atlas <- read_dta("atlas.dta")
+
+ca_atlas <- us_atlas %>%
+  filter(state == 6)
+
+oc_atlas_25pi <- read.csv("shown_tract_kfr_rP_gP_p25(1).csv")
+
+oc_atlas_50pi <- read.csv("shown_tract_kfr_rP_gP_p50.csv")
+
+oc_atlas_75pi <- read.csv("shown_tract_kfr_rP_gP_p75.csv")
+
+oc_atlas_100pi <- read.csv("shown_tract_kfr_rP_gP_pall(1).csv")
+#switching na's for 0, then doing weighted means US, CA, OC
+
+#US data playing, the following appreciations is used, USMMW25 means US Mean Mobility 25th percentile. CAMMW25 is the California, OCMMW25
+#is for Orange County
+
+#25h percentile
+us_atlas$kfr_pooled_p25[is.na(us_atlas$kfr_pooled_p25)] <- 0
+
+us_atlas_kfr_pooled_p25 <- us_atlas$kfr_pooled_p25
+
+us_atlas$count_pooled[is.na(us_atlas$count_pooled)] <- 0
+
+us_count_poooled <- us_atlas$count_pooled
+
+USMMW25 <- weighted.mean(us_atlas_kfr_pooled_p25, us_count_poooled)
+
+
+#75th percentile
+
+us_atlas$kfr_pooled_p75[is.na(us_atlas$kfr_pooled_p75)] <- 0
+
+us_atlas_kfr_pooled_p75 <- us_atlas$kfr_pooled_p75
+
+us_atlas$count_pooled[is.na(us_atlas$count_pooled)] <- 0
+
+us_count_poooled <- us_atlas$count_pooled
+
+USMMW75 <- weighted.mean(us_atlas_kfr_pooled_p75, us_count_poooled)
+
+#100th Percentile
+
+us_atlas$kfr_pooled_p100[is.na(us_atlas$kfr_pooled_p100)] <- 0
+
+us_atlas_kfr_pooled_p100 <- us_atlas$kfr_pooled_p100
+
+us_atlas$count_pooled[is.na(us_atlas$count_pooled)] <- 0
+
+us_count_poooled <- us_atlas$count_pooled
+
+USMMW100 <-
+  weighted.mean(us_atlas_kfr_pooled_p100, us_count_poooled)
+
+#california playing data
+
+#25TH
+
+ca_atlas$kfr_pooled_p25[is.na(ca_atlas$kfr_pooled_p25)] <- 0
+
+ca_atlas_kfr_pooled_p25 <- ca_atlas$kfr_pooled_p25
+
+ca_atlas$count_pooled[is.na(ca_atlas$count_pooled)] <- 0
+
+ca_count_poooled <- ca_atlas$count_pooled
+
+CAMMW25 <- weighted.mean(ca_atlas_kfr_pooled_p25, ca_count_poooled)
+
+#75th percentile
+
+ca_atlas$kfr_pooled_p75[is.na(ca_atlas$kfr_pooled_p75)] <- 0
+
+ca_atlas_kfr_pooled_p75 <- ca_atlas$kfr_pooled_p75
+
+ca_atlas$count_pooled[is.na(ca_atlas$count_pooled)] <- 0
+
+ca_count_poooled <- ca_atlas$count_pooled
+
+CAMMW75 <- weighted.mean(ca_atlas_kfr_pooled_p75, ca_count_poooled)
+
+#100th percentile
+
+ca_atlas$kfr_pooled_p100[is.na(ca_atlas$kfr_pooled_p100)] <- 0
+
+ca_atlas_kfr_pooled_p100 <- ca_atlas$kfr_pooled_p100
+
+ca_atlas$count_pooled[is.na(ca_atlas$count_pooled)] <- 0
+
+ca_count_poooled <- ca_atlas$count_pooled
+
+CAMMW100 <-
+  weighted.mean(ca_atlas_kfr_pooled_p100, ca_count_poooled)
+
+
+#OC playing
+
+OCMMW25 <- mean(oc_atlas_25pi$Household_Income_rP_gP_p25, na.rm = T)
+
+OCMMW75  <-
+  mean(oc_atlas_75pi$Household_Income_rP_gP_p75, na.rm = T)
+
+OCMMW100 <-
+  mean(oc_atlas_100pi$Household_Income_rP_gP_pall, na.rm = T)
+
+#viewing Results
+
+MeanMobilityWeighted_resutls <- c(USMMW25
+                                  
+                                  ,
+                                  USMMW75
+                                  
+                                  ,
+                                  USMMW100
+                                  
+                                  ,
+                                  CAMMW25
+                                  
+                                  ,
+                                  CAMMW75
+                                  
+                                  ,
+                                  CAMMW100
+                                  
+                                  ,
+                                  OCMMW25
+                                  
+                                  ,
+                                  OCMMW75
+                                  
+                                  ,
+                                  OCMMW100)
+
+#finding the standard deviations CAWSD25 means CAlifornia Weighted Standard Deviation 25th percentile. 
+
+CAWSD25 <-
+  sqrt((sum(ca_count_poooled * ((ca_atlas_kfr_pooled_p25 - CAMMW25) ^ 2
+  )) / (8011 * ((
+    sum(ca_count_poooled)
+  ) / 8012))))
+
+CAWSD75 <-
+  sqrt((sum(ca_count_poooled * ((ca_atlas_kfr_pooled_p75 - CAMMW75) ^ 2
+  )) / (8011 * ((
+    sum(ca_count_poooled)
+  ) / 8012))))
+
+CAWSD100 <-
+  sqrt((sum(ca_count_poooled * ((ca_atlas_kfr_pooled_p100 - CAMMW100) ^ 2
+  )) / (8011 * ((
+    sum(ca_count_poooled)
+  ) / 8012))))
+
+USWSD25 <-
+  sqrt((sum(us_count_poooled * ((us_atlas_kfr_pooled_p25 - USMMW25) ^ 2
+  )) / (73278 * ((
+    sum(us_count_poooled)
+  ) / 73278))))
+
+USWSD75 <-
+  sqrt((sum(us_count_poooled * ((us_atlas_kfr_pooled_p75 - USMMW75) ^ 2
+  )) / (73278 * ((
+    sum(us_count_poooled)
+  ) / 73278))))
+
+USWSD100 <-
+  sqrt((sum(us_count_poooled * ((us_atlas_kfr_pooled_p100 - USMMW100) ^ 2
+  )) / (73278 * ((
+    sum(us_count_poooled)
+  ) / 73278))))
+
+OCWSD25 <-
+  sd(oc_atlas_25pi$Household_Income_rP_gP_p25, na.rm = TRUE)
+
+OCWSD75 <-
+  sd(oc_atlas_75pi$Household_Income_rP_gP_p75, na.rm = TRUE)
+
+OCWSD100 <-
+  sd(oc_atlas_100pi$Household_Income_rP_gP_pall, na.rm = TRUE)
+#Viewing results
+
+SD_results <- c(USWSD25
+                
+                ,
+                USWSD75
+                
+                ,
+                USWSD100
+                
+                ,
+                CAWSD25
+                
+                ,
+                CAWSD75
+                
+                ,
+                CAWSD100
+                
+                ,
+                OCWSD25
+                
+                ,
+                OCWSD75
+                
+                ,
+                OCWSD100)
+
+view(SD_results)
+
+#some data manipulation for this stuff
+
+
+#question 6
+OC_atlas_2575 <- merge(oc_atlas_25pi, oc_atlas_75pi, by = "Name")
+
+income.lm <-
+  lm(Household_Income_rP_gP_p75 ~ Household_Income_rP_gP_p25,
+     data = OC_atlas_2575)
+
+ggplot(data = OC_atlas_2575,
+       aes(x = Household_Income_rP_gP_p25, y = Household_Income_rP_gP_p75)) +
+  geom_point() +
+  
+  geom_smooth(method = lm, se = FALSE) +
+  
+  labs(title = "Incomes in Orange County Tracts",
+       x = "25th Percentile Income",
+       y = "75th percentile income")
