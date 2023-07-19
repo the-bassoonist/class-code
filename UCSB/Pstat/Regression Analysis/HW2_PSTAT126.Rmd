@@ -1,0 +1,79 @@
+---
+title: "Homework Two"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=F, message=F, echo = TRUE)
+```
+## Question one
+We import the data and assign it to data
+```{r}
+library(tidyverse)
+library(faraway)
+data<-cheddar
+```
+
+We then make a regression model as such
+
+```{r}
+fit<-lm(taste~Acetic+H2S+Lactic, data= cheddar)
+summary(fit)
+```
+as we can see, H2S and Lactic are the two variables that are significant at the 5% significance level
+
+We then adjust Acetic and H2S to their original scales. 
+```{r}
+fitexp<- lm(taste ~ I(exp(1)^Acetic) + I(exp(1)^H2S)+Lactic, data=cheddar)
+
+summary(fitexp)
+```
+As seen in the summary, only the variable lactic is significant at the 5% significance level. 
+
+In ANOVA testing, the F test is used to compare nested models. Here, the models are not nested and thus we cannot use the F test. 
+The models both give us $R^2$ values of 0.6518 and .0574 respectively. It is clear that the first model gives a better fit. 
+To find the change in response, we must multiply the coefficient by the desired increase. In our case:
+
+$$
+0.01*3.9118=0.039188
+$$
+
+To find the change on H2S we use the following 
+
+$$
+e^{0.01}= 1.01
+$$
+meaning that there is a 101% change in H2S if there is an additive increase of .01 on the logarithmic scale. 
+
+## Question Two
+
+Importing the data
+
+```{r}
+data1<- teengamb
+```
+
+Creating the model
+
+```{r}
+gambmod <- lm(gamble ~ sex+status+income+verbal, data=data1)
+summary(gambmod)
+```
+
+We are thus able to see that Sex and Income are significant variables at the 5% significance level. 
+
+If we are to interpret sex, we know that sex is a binary variable. Thus, if beta = 1, then we know that the point is female, and that females have a negative relationship with gambeling in comparison to males. 
+
+Creating a new model with just income
+
+```{r}
+gambmod1<- lm(gamble ~ income, data=data1)
+summary(gambmod1)
+```
+
+We then use anova analysis to confuct the f test
+
+```{r}
+anova(gambmod, gambmod1)
+```
+We thus see with the pvalue of the f test that is it lower than our significance level. Thus we are able to conclude that the full model is better than the reduced model. 
