@@ -1,0 +1,47 @@
+sum received_cmto_services hoh_age child_count less_hs college_plus if treatment_group == 0
+sum received_cmto_services hoh_age child_count less_hs college_plus if treatment_group == 1
+
+nt01 <- lm( hoh_age~
+pha+
+treatment_group,
+data = cmto)
+nt02<- lm( child_count~
+pha+
+treatment_group,
+data = cmto)
+nt03<- lm( less_hs~
+pha+
+treatment_group,
+data = cmto)
+nt04<- lm( college_plus~
+pha+
+treatment_group,
+data = cmto)
+nt05<- lm( speaks_english~
+pha+
+treatment_group,
+data = cmto)
+summary(nt01)
+summary(nt02)
+summary(nt03)
+summary(nt04)
+summary(nt05)
+
+ertreat<-lm(treatment_group~
+received_cmto_services,
+data = cmto
+)
+summary(ertreat)
+
+nrr1 <- lm(leased_up_opp~
+treatment_group,
+data = cmto
+)
+summary(nrr1)
+
+reg leased_up_opp treatment_group received_cmto_services, r
+
+ivregress 2sls leased_up_opp (hh_income = treatment_group) if pha == 1
+ivregress 2sls leased_up_opp (hh_income = treatment_group) if pha == 0
+ivregress 2sls leased_up_opp (hh_income = treatment_group) if hh_income < 18986
+ivregress 2sls leased_up_opp (hh_income = treatment_group) if hh_income > 18986
