@@ -1,0 +1,116 @@
+library(tidyverse)
+
+airbnb <- read_csv("assign_3.csv")
+
+
+
+airbnb <- rename(airbnb, c("neighborhood" = "neighbourhood"))
+
+
+
+neighborhoods <- count(airbnb, neighborhood)
+
+
+
+neighborhoods <- tibble(neighborhoods) %>%
+
+  filter(neighborhood != "na")
+
+
+
+neighborhoods <- tibble(neighborhoods) %>%
+
+  arrange(desc(n))
+
+
+
+neighborhoods <- tibble(neighborhoods) %>%
+
+  head(20)
+
+
+
+top20 <- pull(neighborhoods, neighborhood)
+
+
+
+airbnb_top_neighborhoods <- airbnb %>%
+
+  filter(neighborhood %in% top20)
+
+
+
+summary_stats_top_neighborhoods <- airbnb_top_neighborhoods %>%
+
+  group_by(neighborhood) %>%
+
+  summarise(
+
+    avg_square_feet = mean(square_feet, na.rm = T),
+
+    avg_price = mean(price, na.rm = T),
+
+    sd_price = sd(price, na.rm = T),
+
+    max_price = max(price, na.rm = T),
+
+    min_price = min(price, na.rm = T)) %>%
+
+  arrange(desc(avg_square_feet))
+
+
+
+highest_avg_square_ft <- as.numeric(summary_stats_top_neighborhoods[1,2])
+
+
+
+second_avg_price <- as.numeric(summary_stats_top_neighborhoods[11,3])
+
+
+
+airbnb_subset <- airbnb %>%
+
+  select(host_is_superhost, price, cleaning_fee, neighborhood,
+
+         require_guest_phone_verification, cancellation_policy) %>%
+
+  mutate(is_superhost = ifelse(host_is_superhost == TRUE, 1, 0))
+
+
+
+total_super_hosts <- airbnb_subset %>%
+
+  count(is_superhost, na.rm = T)
+
+
+
+total_super_hosts <- 199
+
+
+
+airbnb_subset <- airbnb_subset %>%
+
+  filter(is_superhost != "NA")
+
+
+
+hidden_fees <- airbnb_subset %>%
+
+  group_by(is_superhost) %>%
+
+  summarise(avg_price = mean(price, na.rm = T), 
+
+            avg_cleaning_fee = mean(cleaning_fee, na.rm = T))
+
+
+
+privacy_test <- airbnb_subset %>% 
+
+  group_by(is_superhost, require_guest_phone_verification) %>%
+
+  count(require_guest_phone_verification)%>%
+
+  mutate(frac = n/999) %>%
+
+  arrange(desc(frac))
+
