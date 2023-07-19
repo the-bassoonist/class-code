@@ -1,0 +1,256 @@
+library(tidyverse)
+
+library(janitor)
+
+library(lubridate)
+
+library(magrittr)
+
+library(ggplot2)
+
+library(ggthemes)
+
+
+
+final_2_dat <- read_csv("final_2.csv")
+
+
+
+## (1)
+
+
+
+final_2_dat <- final_2_dat %>%
+
+  mutate(msa = gsub("(Metropolitan Statistical Area)", "", geo_name, fixed = T)) %>%
+
+  mutate(msa = trimws(msa))
+
+
+
+## (2)
+
+
+
+cleaned_final_2_dat <- final_2_dat %>%
+
+  select(msa, description, x2018) %>% 
+
+  rename(value = x2018)
+
+
+
+## (3)
+
+
+
+cleaned_final_2_dat %<>% 
+
+  mutate(value = ifelse(value == "(D)", NA, value))
+
+
+
+## (4)
+
+
+
+cleaned_final_2_dat %<>%
+
+  mutate(value = gsub(",", "", value)) %>%
+
+  mutate(value = gsub("E", "", value)) %>% 
+
+  mutate(value = as.numeric(value))
+
+
+
+## (5)
+
+
+
+usable_5 <- cleaned_final_2_dat %>%
+
+  pivot_wider(names_from = description,
+
+              values_from = value)
+
+
+
+usable_5 %<>%
+
+  rename(c(manufacturing = Manufacturing,
+
+           comp = `Computer and electronic product manufacturing`,
+
+           elect = `Electrical equipment, appliance, and component manufacturing`,
+
+           data = `Data processing, hosting, and related services`,
+
+           pers_inc = `Personal income (thousands of dollars)`,
+
+           pop = `Population (persons) 1/`,
+
+           pers_inc_per_cap = `Per capita personal income (dollars) 2/`))
+
+
+
+## (6)
+
+
+
+usable_5$manufacturing %>% quantile(na.rm = T)
+
+
+
+manuf_low_cost_value <- 2016891.2
+
+
+
+usable_5 %>%
+
+  filter(manufacturing > 2016891.2) %>%
+
+  summarize(min(as.numeric(pers_inc_per_cap), na.rm = T))
+
+
+
+usable_5 %>% filter(pers_inc_per_cap == 40486)
+
+
+
+manuf_low_cost <- "Riverside-San Bernardino-Ontario, CA"
+
+
+
+## (7)
+
+
+
+cleaned_split <- usable_5 %>% 
+
+  separate(col = msa,
+
+           into = c("msa", "state"),
+
+           sep = "(,)",
+
+           remove = F) %>% 
+
+  mutate(state = trimws(state))
+
+
+
+cleaned_split %<>%
+
+  select(state, msa, manufacturing, comp, elect, data, pers_inc, pop, pers_inc_per_cap)
+
+
+
+## (8)
+
+
+
+cleaned_split_long <- cleaned_split %>% 
+
+  pivot_longer(cols = c("manufacturing", "comp", "elect", "data", "pers_inc", "pop", "pers_inc_per_cap"),
+
+               names_to = "description",
+
+               values_to = "value")
+
+
+
+## (9)
+
+
+
+#Create a function title msa_large that inputs the name of a state and
+
+#exports a tibble of the MSA with the largest value for each metric
+
+#using cleaned_split_long
+
+
+
+
+
+
+
+msa_large <- function(input) {
+
+  df <- cleaned_split_long %>% 
+
+    mutate(state = gsub("*", "", state, fixed = T)) %>%
+
+    mutate(state = trimws(state)) %>% 
+
+    mutate(value = as.numeric(value)) %>%
+
+    filter(input == state)
+
+  max_c <- df %>% filter(description == "comp") %>% filter(value == max(value, na.rm = T))
+
+  max_d <- df %>% filter(description == "data") %>% filter(value == max(value, na.rm = T))
+
+  max_e <- df %>% filter(description == "elect") %>% filter(value == max(value, na.rm = T))
+
+  max_m <- df %>% filter(description == "manufacturing") %>% filter(value == max(value, na.rm = T))
+
+  max_p <- df %>% filter(description == "pers_inc") %>% filter(value == max(value, na.rm = T))
+
+  max_pipc <- df %>% filter(description == "pers_inc_per_cap") %>% filter(value == max(value, na.rm = T))
+
+  max_pop <- df %>% filter(description == "pop") %>% filter(value == max(value, na.rm = T))
+
+  state_summary <- tibble(comp = max_c$msa, data = max_d$msa, elect = max_e$msa,
+
+                          manufacturing = max_m$msa, pers_inc = max_p$msa, pers_inc_per_cap = max_pipc$msa,
+
+                          pop = max_pop$msa)
+
+  return(state_summary)
+
+}
+
+
+
+
+
+msa_large2 <- function(input) {
+
+  x <- str_to_upper(input)
+
+  df <- cleaned_split_long %>% 
+
+    mutate(state = gsub("*", "", state, fixed = T)) %>%
+
+    mutate(state = trimws(state)) %>% 
+
+    mutate(value = as.numeric(value)) %>%
+
+    filter(x == state)
+
+  max_c <- df %>% filter(description == "comp") %>% filter(value == max(value, na.rm = T))
+
+  max_d <- df %>% filter(description == "data") %>% filter(value == max(value, na.rm = T))
+
+  max_e <- df %>% filter(description == "elect") %>% filter(value == max(value, na.rm = T))
+
+  max_m <- df %>% filter(description == "manufacturing") %>% filter(value == max(value, na.rm = T))
+
+  max_p <- df %>% filter(description == "pers_inc") %>% filter(value == max(value, na.rm = T))
+
+  max_pipc <- df %>% filter(description == "pers_inc_per_cap") %>% filter(value == max(value, na.rm = T))
+
+  max_pop <- df %>% filter(description == "pop") %>% filter(value == max(value, na.rm = T))
+
+  state_summary <- tibble(comp = max_c$msa, data = max_d$msa, elect = max_e$msa,
+
+                          manufacturing = max_m$msa, pers_inc = max_p$msa, pers_inc_per_cap = max_pipc$msa,
+
+                          pop = max_pop$msa)
+
+  return(state_summary)
+
+}
+
