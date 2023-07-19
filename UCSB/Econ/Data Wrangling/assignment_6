@@ -1,0 +1,228 @@
+library(tidyverse)
+
+assign_6_dat <- read_csv("assign_6.csv")
+
+set.seed(6293039)
+
+practice_vector <- runif(10, min = 0, max = 25)
+
+one_hundred <- 1:100
+
+
+
+for (i in 1:5) {
+
+  print(practice_vector[i])
+
+}
+
+
+
+squared_numbers <- rep(NA, 10)
+
+
+
+for (i in squared_numbers) {
+
+  squared_numbers = (practice_vector) ^ 2
+
+}
+
+
+
+even_numbers <- as.numeric(vector())
+
+odd_numbers <- as.numeric(vector())
+
+
+
+for (i in one_hundred) {
+
+  if (one_hundred[i] %% 2 == 0)
+
+    even_numbers <- c(even_numbers, one_hundred[i])
+
+}
+
+
+
+for (i in one_hundred) {
+
+  if (one_hundred[i] %% 2 == 1)
+
+    odd_numbers <- c(odd_numbers, one_hundred[i])
+
+}
+
+
+
+maximum <- function(value) {
+
+  max_val <- max(value)
+
+  return(max_val)
+
+  
+
+}
+
+
+
+maximum(practice_vector)
+
+
+
+#hist_gg <- function(tibble, column, xlabel, title) {
+
+ # ggplot(data = tibble,
+
+  #       aes(x = column, xlab(xlabel), title(title)) +
+
+   #        geom_bar())
+
+#}
+
+
+
+
+
+msa <- function(input, dataset){
+
+  df <- dataset %>% filter(input == geo_name)
+
+  city <- input
+
+  large <- which.max(df$year_2018)
+
+  small <- which.min(df$year_2018)
+
+  hidden <- sum(is.na(df$year_2018))
+
+  tibble <- tibble(msa=city, largest_industry = df$description[large],
+
+                   smallest_industry=df$description[small], 
+
+                   number_unobserved_industries = hidden)
+
+  return(tibble)
+
+}
+
+
+
+
+
+msa1 <- function(input, dataset){
+
+  df1 <- dataset %>% filter(input[1] == geo_name)
+
+  large1 <- which.max(df1$year_2018)
+
+  small1 <- which.min(df1$year_2018)
+
+  hidden1 <- sum(is.na(df1$year_2018))
+
+  df2 <- dataset %>% filter(input[2] == geo_name)
+
+  large2 <- which.max(df2$year_2018)
+
+  small2 <- which.min(df2$year_2018)
+
+  hidden2 <- sum(is.na(df2$year_2018))
+
+  tibble1 <- tibble(msa=input[1], largest_industry = df1$description[large1],
+
+                    smallest_industry=df1$description[small1], 
+
+                    number_unobserved_industries = hidden1)
+
+  tibble2 <- tibble(msa=input[2], largest_industry = df2$description[large2],
+
+                    smallest_industry = df2$description[small2], 
+
+                    number_unobserved_industries = hidden2)
+
+  tibblex <- rbind(tibble1, tibble2)
+
+  return(tibblex)
+
+
+
+}
+
+
+
+# msa1(c("Abline, TX", "Albany, GA"), assign_6_dat)
+
+ugn<-unique(assign_6_dat$geo_name)
+
+msa2 <- function(input, dataset){
+
+  df1 <- dataset %>% filter(input[1] == geo_name)
+
+  large1 <- which.max(df1$year_2018)
+
+  small1 <- which.min(df1$year_2018)
+
+  hidden1 <- sum(is.na(df1$year_2018))
+
+  df2 <- dataset %>% filter(input[2] == geo_name)
+
+  large2 <- which.max(df2$year_2018)
+
+  small2 <- which.min(df2$year_2018)
+
+  hidden2 <- sum(is.na(df2$year_2018))
+
+  df3 <- if(input == ugn){
+
+    df3 <- dataset %>% filter(input[3] == geo_name)
+
+    large3 <- which.max(df3$year_2018)
+
+    small3 <- which.min(df3$year_2018)
+
+    hidden3 <- sum(is.na(df3$year_2018))
+
+    tibble3 <- tibble(msa=input[3], largest_industry = df3$description[large3],
+
+                      smallest_industry = df3$description[small3], 
+
+                      number_unobserved_industries = hidden3)
+
+  }
+
+    else{
+
+      tibble3b <- tibble(msa=input[3], largest_industry = "not in sample",
+
+                        smallest_industry = "not in sample", 
+
+                        number_unobserved_industries = NA)
+
+      return(tibble3b)
+
+    }
+
+  tibble1 <- tibble(msa=input[1], largest_industry = df1$description[large1],
+
+                    smallest_industry=df1$description[small1], 
+
+                    number_unobserved_industries = hidden1)
+
+  tibble2 <- tibble(msa=input[2], largest_industry = df2$description[large2],
+
+                    smallest_industry = df2$description[small2], 
+
+                    number_unobserved_industries = hidden2)
+
+  
+
+  
+
+  }
+
+
+
+msa1(c("Abline, TX", "Albany, GA", "jibberish"), assign_6_dat)
+
