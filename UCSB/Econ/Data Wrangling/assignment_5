@@ -1,0 +1,171 @@
+library(ggplot2)
+
+library(tidyverse)
+
+library(lubridate)
+
+la_arrests <- read_csv("la_arrests.csv")
+
+
+
+# (a & b)
+
+
+
+# part a did not have fill = sex_code but had fill = "blue" in geom_density argument
+
+
+
+# la_arrests %>% filter(!is.na(sex_code)) %>% 
+
+#   mutate(Sex = ifelse(sex_code == "M", "Male", "Female")) %>%  
+
+#   ggplot(aes(x = age, fill = Sex)) +
+
+#   geom_density(alpha = .5) +
+
+#   labs(x = "Age", y = "Density", title = "Age Distribution of Arrests", fill = "Sex")
+
+
+
+# 3
+
+
+
+frequent_crimes <- la_arrests %>% 
+
+  count(charge_group_description, sort = T) %>% 
+
+  filter(!is.na(charge_group_description))
+
+
+
+
+
+
+
+
+
+
+
+
+
+frequent_crimes <-  frequent_crimes %>% 
+
+  mutate(charge_group_description = fct_reorder(charge_group_description, n))
+
+
+
+# frequent_crimes %>% 
+
+#  ggplot(aes(x = n, y = charge_group_description)) +
+
+#  geom_col(fill = "lightblue") +
+
+# labs(x = "Total Number of Crimes", y = "Type of Crime", title = "Most Frequent Crimes") +
+
+# theme_light()
+
+# la_arrests %>% 
+
+#  count(charge_group_description, sex_code, sort = T) %>% 
+
+#  filter(!is.na(charge_group_description)) %>% 
+
+#  mutate(charge_group_description = fct_reorder(charge_group_description, n)) %>%
+
+#  mutate(sex_code = ifelse(sex_code == "M", "Male", "Female")) %>% 
+
+#  ggplot(aes(x = n, y = charge_group_description, fill = sex_code)) +
+
+#  geom_col() +
+
+#  labs(x = "Total Number of Crimes",
+
+#       y = "Type of Crime",
+
+#       title = "Most Frequent Crimes",
+
+#       fill = "Sex") + theme_light()
+
+
+
+# 4
+
+
+
+nyc_arrests <- read_csv("nyc_arrests.csv")
+
+
+
+# 5
+
+# (a) NOTE: add age_group into the group_by() to use one of later the graphs
+
+
+
+total_crime <- nyc_arrests %>% 
+
+  group_by(year, month) %>% 
+
+  summarize(total_crime = n())
+
+
+
+# (b)
+
+
+
+total_crime <- total_crime %>%
+
+  mutate(date = lubridate::ymd(paste0(year, "-", month, "-", "1")))
+
+
+
+#total_crime %>% 
+
+#  ggplot() +
+
+#  geom_path(aes(x = date, y = total_crime, color = age_group)) +
+
+#  labs(x = "Date",
+
+#       y = "Number of Crimes",
+
+#       title = "Total Crimes by Year",
+
+#       color = "Age Group")
+
+
+
+
+
+
+
+
+
+
+
+# 6
+
+
+
+#bbox<- c(left = -74.35, bottom = 40.498, right = -73.687, top = 40.90)
+
+#nyc <-get_stamenmap(bbox, zoom = 11, maptype = "terrain")
+
+
+
+# (c + d)
+
+
+
+#ggmap(nyc) +
+
+#  geom_point(data = nyc_arrests %>% filter(ofns_desc == "ROBBERY") %>% 
+
+#               mutate(perp_sex = ifelse(perp_sex == "M", "Male", "Female")),
+
+#             aes(x = longitude, y = latitude, color = perp_sex), alpha = 0.7)+
+
+#  labs(title = "Robberies in NYC", color = "Perpetrator Sex")+ theme_map()
