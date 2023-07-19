@@ -1,0 +1,130 @@
+library(readr)
+
+library(tidyverse)
+
+festival_data <- read_csv("assign_2.csv")
+
+
+
+view(festival_data)
+
+
+
+column_names_of_festival <- colnames(festival_data)
+
+
+
+column_names_of_festival %>% tibble()
+
+column_names_of_festival_tibble <- column_names_of_festival %>% tibble()
+
+
+
+festival_data_unique <- festival_data %>%
+
+  distinct()
+
+
+
+total_response <- nrow(festival_data_unique)
+
+
+
+festival_data_unique_subset <- tibble(
+
+  festival_data_unique %>%
+
+    select(lodging, 
+
+           hours_attend, 
+
+           gender, 
+
+           spend_travel_total)
+
+)
+
+
+
+males <- festival_data_unique_subset %>%
+
+  filter(gender == "Male")
+
+
+
+females <- festival_data_unique_subset %>%
+
+  filter(gender == "Female")
+
+
+
+mean_hours_male<-as.numeric(mean_hours_male <- males %>%
+
+  summarise(mean = mean(hours_attend, na.rm=T)))
+
+
+
+mean_hours_female <- as.numeric(mean_hours_female <- females %>%
+
+  summarise(mean = mean(hours_attend, na.rm = T)))
+
+
+
+festival_data_unique_subset %>%
+
+  group_by((gender)) %>% 
+
+  summarize(mean = mean(hours_attend, na.rm = T))
+
+
+
+pnts <- festival_data_unique_subset %>% 
+
+  filter(gender =="Prefer not to say")
+
+
+
+mean_hours_pnts<- as.numeric(mean_hours_pnts <- pnts %>% 
+
+  summarize(mean = mean(hours_attend, na.rm = T)))
+
+
+
+festival_data_unique_subset <- festival_data_unique_subset %>%
+
+  mutate(resident = ifelse(lodging == "Boulder Resident", 1, 0))
+
+
+
+festival_data_unique_subset <- festival_data_unique_subset %>%
+
+  mutate(non_resident = ifelse(lodging == "Hotel or motel" |
+
+                                 lodging == "Friends, family or no expense",
+
+                               1, 0))
+
+
+
+frac_resident <- festival_data_unique_subset %>% 
+
+  summarize(mean = mean(resident, na.rm = T))
+
+
+
+column_names_of_festival_tibble <- column_names_of_festival_tibble %>%
+
+  rename(column_names = ".")
+
+head(column_names_of_festival_tibble)
+
+
+
+festival_data_unique_subset$hours_attend %>% 
+
+  hist(main = "Hours Spent at Festival",
+
+       xlab = "Hours",
+
+       ylab = "Number of Visitors", col = "lightblue")
+
