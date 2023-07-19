@@ -1,0 +1,39 @@
+# This code is to produce graphs in STATA
+binscatter classize school_enrollment if inrange(school_enrollment,20,60), rd(40.5) discrete
+line(lfit) title("Class Size Dependant on School Enrollment") ytitle("Class Size") xtitle("Total
+School Enrollment in 5th Grade")
+
+binscatter avgmath school_enrollment if inrange(school_enrollment,20,60), rd(40.5) discrete
+line(qfit) title("Average Math Score Dependant on School Enrollment") ytitle("Average
+Composite Math Scores") xtitle("Total School Enrollment in 5th Grade")
+
+binscatter avgverb school_enrollment if inrange(school_enrollment,20,60), rd(40.5) discrete
+line(qfit) title("Average Verbal Score Dependant on School Enrollment") ytitle("Average
+Composite Verbal Scores") xtitle("Total School Enrollment in 5th Grade")
+
+binscatter disadvantaged school_enrollment if inrange(school_enrollment,20,60), rd(40.5)
+discrete line(lfit) title("Fraction of Disadvantaged in Class vs School Enrollment") ytitle("Percent
+of Class Being Disadvantaged") xtitle("Average Enrollment in the 5th Grade")
+
+binscatter religious school_enrollment if inrange(school_enrollment,20,60), rd(40.5) discrete
+line(lfit) title("Fraction of Religious Schools vs School Enrollment") ytitle("Percent of Class
+Being Disadvantaged") xtitle("Average Enrollment in the 5th Grade")
+
+binscatter female school_enrollment if inrange(school_enrollment,20,60), rd(40.5) discrete
+line(lfit) title("Fraction of Females in Class vs School Enrollment") ytitle("Percent of Class
+Being Disadvantaged") xtitle("Average Enrollment in the 5th Grade")
+
+# This code cleans data to make regressions simple 
+gen above40 = 0
+
+replace above40 = 1 if school_enrollment > 40
+
+gen x = school_enrollment – 40
+
+gen x_above40 = x*above40
+
+reg school_enrollment above40 x x_above40 if inrange(school_enrollment,0,80), cluster(schlcode)
+
+reg avgmath above40 x x_above40 if inrange(school_enrollment,0,80), cluster(schlcode)
+
+reg avgverb above40 x x_above40 if inrange(school_enrollment,0,80), cluster(schlcode)
