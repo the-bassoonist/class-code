@@ -1,0 +1,167 @@
+---
+title: "Homework Two"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=F, message=F, echo = TRUE)
+```
+
+## Question One
+We import our data and take a quick look to make sure it looks correct. 
+```{r}
+library(faraway)
+library(car)
+head(sat)
+```
+
+Now, we create a model with SAT as the response and expend ratio salary and takers as the predictor variables. 
+
+```{r}
+model1<-lm(total~expend+salary+ratio+takers, data = sat)
+
+summary(model1)
+```
+
+### a
+
+We plot the residuals to check for the constant variance assumption. 
+
+```{r}
+plot(fitted(model1), residuals(model1), xlab="Fitted", ylab="Residuals", abline(h=0))
+```
+
+Visually, we see that there is not any unusual patterns that indicate a non-constant variance. Regardless we can run a non-constant variance score test
+
+```{r}
+car::ncvTest(model1)
+```
+
+We see that the P value is greater that .05 and thus we can say that the variance of the residuals is constant. 
+
+### b 
+
+We can check the normality assumption by making a qq plot of the residuals
+
+```{r}
+qqnorm(residuals(model1))
+qqline(residuals(model1))
+```
+
+Visually, we see that there is no cause to doubt that the normality assumption holds. Additionally, we can run a Shapiro test to see if the normality assumption holds. 
+
+```{r}
+shapiro.test(residuals(model1))
+```
+
+because of the sufficiently large P value, we can say that the normality assumption holds. 
+
+### c 
+
+we check the values of the diagonal hat matrix to see the leverage
+
+```{r}
+hat<- hatvalues(model1)
+p=length(coefficients(model1))
+n=length(fitted(model1))
+ratio=p/n
+plot(hat, main = 'Levarage plot', ylab = 'levarage', xlab = 'index')
+abline(h=c(2,3)*ratio, col="blue", lty=2)
+which.max(hat)
+which.max(hat[hat!=max(hat)])
+text(44, hat["Utah"], labels="UT", cex=.7, font=2)
+text(5,hat["California"], labels="CA", cex=0.7, font=2)
+```
+we see that california and Utah are levarage points
+
+### d 
+
+We now check for out-liers and see that there are none to be found. 
+
+```{r}
+car::outlierTest(model1)
+```
+
+### e 
+
+we use R plotting tools to check the influence points. We see that they are Utah and California. 
+
+```{r}
+car::influencePlot(model1, id.method="identify", main="influence plot", sub="Circle Size is poportional to cook's distance")
+```
+
+### f 
+We now use R to plot the relationships with the other other predictors and response. 
+
+```{r}
+car::avPlots(model1)
+```
+
+We see that there are weak positive linear relationships with expend and salary. There are negative relationships with ratio and takers. Ratio however has a weak negative relationship while takers is a strong negative relationship. 
+# Question two
+
+```{r}
+head(prostate)
+
+model2<- lm(lpsa~., data=prostate)
+
+summary(model2)
+```
+
+Checking Constance variance assumption
+
+```{r}
+plot(fitted(model2), residuals(model2), xlab="fitter", ylab = "residuals", abline(h=0))
+ncvTest(model2)
+```
+
+we see that our P value is large and visually, there is nothing strange. Thus our assumption holds. 
+
+#### b 
+
+checking the normality assumption. 
+
+```{r}
+shapiro.test(residuals(model2))
+qqnorm(residuals(model2))
+qqline(residuals(model2))
+
+```
+P value is large, and there is nothing wrong visually, so the normality assumtion holds. 
+
+```{r}
+hat <- hatvalues(model2)
+p <- length(coefficients(model2))
+m<-length(fitted(model2))
+ratio<-p/m
+
+plot(hat,main = 'Hat Values')
+abline(h=c(2,3)*ratio,col='blue', lty=2)
+which.max(hat)
+text(32,hat[32], labels=round(hat[32], 4), cex=0.7, font=2)
+sum(hatvalues(model2))
+```
+and so, visually we see that there is one high leverage value that is affecting the model. which has a value of .3305 and is the 32th observation. the sum of hat values is nine so it checks out. 
+
+#### d 
+checking for outliers
+
+```{r}
+outlierTest(model2)
+```
+we see that there are no outliers. 
+
+#### e 
+checking for influence points 
+
+```{r}
+influencePlot(model2, id.method="identify", main="influence Plot", sub="Size is proportional to cook's distance")
+```
+we see that 32 has the influence observation. 
+
+#### f
+
+```{r}
+avPlots(model2)
+```
+We see that age and lcp have negative linear relations, age being a strong relationship. all the others have positive relationships, except that lweight and lcavol have strong positive relationships. 
