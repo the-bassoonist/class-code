@@ -1,0 +1,354 @@
+install.packages("ggthemes")
+
+library(tidyverse)
+
+library(janitor)
+
+library(ggthemes)
+
+cms <- read_csv("cms_data.csv")
+
+
+
+q1_b <- cms %>%
+
+  
+
+  mutate(Start.Date = format(as.Date(Start.Date, "%d/%m/%y"), "%m/%d/%Y"))
+
+
+
+q1_c <- q1_b %>%
+
+  
+
+  mutate(
+
+    Number.of.Discharges = ifelse(Number.of.Discharges == "N/A", NA, Number.of.Discharges),
+
+    
+
+    Excess.Readmission.Ratio = ifelse(
+
+      Excess.Readmission.Ratio == "N/A",
+
+      NA,
+
+      Excess.Readmission.Ratio
+
+    ),
+
+    
+
+    Predicted.Readmission.Rate = ifelse(
+
+      Predicted.Readmission.Rate == "N/A",
+
+      NA,
+
+      Predicted.Readmission.Rate
+
+    ),
+
+    
+
+    Expected.Readmission.Rate = ifelse(
+
+      Expected.Readmission.Rate == "N/A",
+
+      NA,
+
+      Expected.Readmission.Rate
+
+    ),
+
+    
+
+    Number.of.Readmissions = ifelse(Number.of.Readmissions == "N/A", NA, Number.of.Readmissions)
+
+  )
+
+
+
+q1_d <- q1_c %>%
+
+  
+
+  filter(!is.na(Excess.Readmission.Ratio))
+
+
+
+q1_d %>% count(Number.of.Readmissions) %>% arrange(desc(Number.of.Readmissions))
+
+
+
+minreadms <- 11
+
+
+
+
+
+forest <- read_csv("forest.csv") %>% clean_names()
+
+
+
+forest_area <- read_csv("forest_area.csv")
+
+
+
+brazil_loss <- read_csv("brazil_loss.csv")
+
+
+
+soybean_use <- read_csv("soybean_use.csv")
+
+
+
+vegetable_oil <- read_csv("vegetable_oil.csv")
+
+
+
+forest %>% count(entity, code, year) %>% filter(n > 1)
+
+
+
+forest_keys <- c("entity", "code", "year")
+
+
+
+forest_soybean <-
+
+  soybean_use %>% left_join(forest, c(
+
+    "entity" = "entity",
+
+    
+
+    "code" = "code",
+
+    
+
+    "year" = "year"
+
+  ))
+
+
+
+
+
+
+
+forest_soybean_intersection <- soybean_use %>% inner_join(forest)
+
+
+
+
+
+
+
+merg_cols <- c("entity", "code", "year")
+
+
+
+
+
+
+
+all_forest_data <- vegetable_oil %>%
+
+  
+
+  left_join(forest, by = merg_cols) %>%
+
+  
+
+  left_join(forest_area, by = merg_cols) %>%
+
+  
+
+  left_join(soybean_use, by = merg_cols)
+
+
+
+
+
+
+
+all_forest_data <- all_forest_data %>%
+
+  
+
+  mutate(across(
+
+    .cols = c(crop_oil:processed),
+
+    
+
+    .fns = ~ ifelse(is.na(.), 1, 0),
+
+    
+
+    .names = "{.col}_missing"
+
+  ))
+
+
+
+
+
+summary_highest_missing <- all_forest_data %>%
+
+  
+
+  summarize(across(
+
+    .cols = c(crop_oil_missing:processed_missing),
+
+    
+
+    .fns = ~ mean(.) * 100,
+
+    
+
+    .names = "{.col}_frac"
+
+  ))
+
+
+
+
+
+
+
+most_missing_data_column <- c("net_forest_conversion_missing")
+
+
+
+
+
+library(ggplot2)
+
+
+
+
+
+world <- map_data("world") %>% filter(region != "Antarctica")
+
+
+
+
+
+forest_area_17 <- forest_area %>%
+
+  
+
+  filter(year == "2017" & !is.na(forest_area))
+
+
+
+
+
+lubridate::setdiff(world$region,
+
+                   
+
+                   forest_area_17$entity)
+
+
+
+
+
+us_standardizer <- function(x) {
+
+  replacement_string <- x
+
+  
+
+  for (variation in replacement_string) {
+
+    if (str_to_lower(variation) %in% c("united states of america", "united states", "us", "usa")) {
+
+      replacement_string[which(replacement_string == variation)] <-
+
+        "United States"
+
+      
+
+    }
+
+    
+
+  }
+
+  
+
+  return(replacement_string)
+
+  
+
+}
+
+
+
+
+
+us_standardizer(c("US", "USA", "United States of America", "usually", "status"))
+
+
+
+
+
+world <- world %>%
+
+  
+
+  mutate(region = us_standardizer(world$region))
+
+
+
+
+
+world$region %>% unique()
+
+
+
+
+
+world_area <-
+
+  world %>% left_join(forest_area_17, c("region" = "entity"))
+
+
+
+world_area %>%
+
+  
+
+  ggplot(aes(x = long, y = lat, group = group, fill = forest_area)) +
+
+  
+
+  geom_polygon(data = world_area, color = "black", size = 0.09) +
+
+  
+
+  scale_fill_gradient(low = "green", high = "blue") +
+
+  #I know it says to do yellow and green however, I think I am colourblind
+
+  #and as a result I cant really see what the graph was trying to do. 
+
+  ggthemes::theme_map() +
+
+  
+
+  labs(title = "BERKIEL MOLINARD-Fraction of Global Forest Area by Country",
+
+       
+
+       fill = "Share of Global Forest Area") +
+
+  
+
+  theme(legend.background=element_rect(fill = alpha("white", 1)))
+
