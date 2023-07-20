@@ -1,0 +1,1 @@
+This is my last class at UCSB that heavily used R. All my homework assignments were writtern in R Markdown, of which I became very familiar due to my time at the Economic Forecast Project. To see a coherent version of the code, please look at the RMD files. To see the outputs, please download the HTML files. 
